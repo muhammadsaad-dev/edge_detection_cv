@@ -1,85 +1,139 @@
-# Edge Detection Tool
+# Interactive Edge Detection Application
 
-A Python project built and managed using **[uv](https://github.com/astral-sh/uv)** — a fast, reliable package and environment manager designed for modern Python workflows.
+**CS-4218 Introduction to Computer Vision - Assignment 1**
 
-## 🚀 Features
+A web-based interactive application for experimenting with edge detection algorithms including Sobel, Laplacian, and Canny edge detectors.
 
-- Fast and reproducible Python environment setup
-- Dependency management using `uv`
-- Lightweight and easy-to-run project structure
-- **Image upload and edge detection** — Upload images and apply edge detection algorithms to identify boundaries and features
+## Project Description
 
-## 🧩 Setup & Installation
+This application provides an intuitive interface to upload images and apply various edge detection algorithms with real-time parameter adjustment. Users can compare the original and edge-detected images side-by-side, helping visualize how different parameters affect edge detection results.
+
+### Supported Algorithms
+
+- **Sobel**: Gradient-based edge detection with adjustable kernel size
+- **Laplacian**: Second derivative-based edge detection with adjustable kernel size
+- **Canny**: Multi-stage edge detection with adjustable thresholds and Gaussian blur parameters
+
+## Setup and Installation
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- pip (for installing uv)
+- Python 3.7 or higher
+- uv (fast Python package installer)
 
 ### Installation Steps
 
-1. **Install uv (if not already installed):**
+1. **Clone the repository**:
 
 ```bash
-   pip install uv
+git clone https://github.com/muhammadsaad-dev/edge_detection_cv.git
+cd edge-detection-cv
 ```
 
-2. **Clone the repository:**
+2. **Create a virtual environment using uv**:
 
 ```bash
-   git clone <your-repo-url>
-   cd <project-directory>
+uv venv
 ```
 
-3. **Create and sync the environment:**
+3. **Activate the virtual environment**:
+
+   - On Windows:
+     ```bash
+     .venv\Scripts\activate
+     ```
+   - On macOS/Linux:
+     ```bash
+     source .venv/bin/activate
+     ```
+
+4. **Install dependencies**:
 
 ```bash
-   uv sync
+uv sync
 ```
 
-## 🎯 Usage
+This will install all dependencies specified in `pyproject.toml` and `uv.lock`.
 
-Run the edge detection tool:
+## How to Run
+
+1. Ensure your virtual environment is activated
+
+2. Run the application:
 
 ```bash
-uv run main.py
+streamlit run main.py
 ```
 
-The application will prompt you to upload an image, then process it to detect edges using computer vision algorithms.
+3. The app will open automatically in your browser at `http://localhost:8501`
 
-## 📦 Dependencies
+## Usage
 
-Dependencies are managed through `uv` and defined in `pyproject.toml`. Key libraries include:
+1. **Upload Image**: Click "Upload an Image" in the sidebar and select a JPG, PNG, or BMP file
+2. **Select Algorithm**: Choose from Sobel, Laplacian, or Canny
+3. **Adjust Parameters**: Use sliders to modify algorithm parameters in real-time
+4. **View Results**: See the edge-detected output alongside the original image
+5. **Download**: Save the processed image using the download button
 
-- OpenCV or Pillow (for image processing)
-- NumPy (for numerical operations)
-- _(List other major dependencies)_
-
-## 🛠️ How It Works
-
-1. **Upload Image:** The user provides an image file (JPEG, PNG, etc.)
-2. **Edge Detection:** The application applies edge detection algorithms (such as Canny, Sobel, or Laplacian)
-3. **Output:** The processed image with detected edges is displayed or saved
-
-## 📝 Project Structure
+## Project Structure
 
 ```
-.
-├── main.py              # Main entry point
-├── pyproject.toml       # Project dependencies and configuration
+edge-detection-app/
+├── main.py              # Streamlit UI application
+├── edge_detection.py    # Edge detection algorithm implementations
+├── pyproject.toml       # Project configuration and dependencies
 ├── uv.lock             # Locked dependency versions
-└── README.md           # This file
+├── README.md           # This file
+└── .venv/              # Virtual environment (not committed)
 ```
 
-## 🤝 Contributing
+## Features
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+✅ Interactive web-based interface  
+✅ Real-time parameter adjustment  
+✅ Side-by-side image comparison  
+✅ Three edge detection algorithms  
+✅ Download processed images  
+✅ Support for multiple image formats
 
-## 📄 License
+## Algorithm Parameters
 
-_(Add your license information here — e.g., MIT, Apache 2.0, etc.)_
+### Sobel
 
-## 🔗 Resources
+- **Kernel Size**: Controls the size of the Sobel operator (1-31, odd numbers only)
 
-- [uv Documentation](https://github.com/astral-sh/uv)
-- [OpenCV Edge Detection Tutorial](https://docs.opencv.org/4.x/da/d22/tutorial_py_canny.html)
+### Laplacian
+
+- **Kernel Size**: Controls the size of the Laplacian kernel (1-31, odd numbers only)
+
+### Canny
+
+- **Lower Threshold**: Lower bound for hysteresis thresholding (0-255)
+- **Upper Threshold**: Upper bound for hysteresis thresholding (0-255)
+- **Sigma**: Standard deviation for Gaussian blur (0.1-5.0)
+
+## Screenshots
+
+### Canny
+
+![Canny algorithm](screenshots\canny.png)
+
+### Sobel
+
+![Sobel algorithm](screenshots\sobel.png)
+
+### Laplacian
+
+![Laplacian algorithm](screenshots\laplacian.png)
+
+## Author
+
+Muhammad Saad  
+0042-BSCS-22
+CS-4218 Introduction to Computer Vision
+
+## Acknowledgments
+
+- Course: CS-4218 Introduction to Computer Vision
+- Project built using Streamlit, OpenCV, and Python
+- Virtual environment managed with uv

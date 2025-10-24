@@ -1,82 +1,159 @@
+import streamlit as st
 import cv2
 import numpy as np
-import streamlit as st
-import edge_detection  # contains sobel_detection, laplacian_detection, canny_detection
+from PIL import Image
 
-st.set_page_config(page_title="🧠 Edge Detection Visualizer", layout="wide")
-
-# ---- Title ----
-st.title("🧠 Interactive Edge Detection Visualizer")
-
-# ---- Upload Image ----
-uploaded = st.file_uploader(
-    "📤 Upload an image (JPG, JPEG, PNG, BMP)", 
-    type=["jpg", "jpeg", "png", "bmp"]
+# Set page configuration
+st.set_page_config(
+    page_title="Interactive Edge Detection",
+    layout="wide"
 )
 
-# ---- Sidebar Controls ----
-st.sidebar.header("⚙️ Controls")
+# Title
+st.title("Interactive Edge Detection Application")
+st.markdown("### CS-4218 Computer Vision - Assignment 1")
 
-if uploaded:
-    # Decode uploaded image
-    file_bytes = np.asarray(bytearray(uploaded.read()), dtype=np.uint8)
-    img = cv2.imdecode(file_bytes, 1)
+# Initialize session state for the uploaded image
+if 'original_image' not in st.session_state:
+    st.session_state.original_image = None
 
-    # ---- Algorithm Selection ----
-    algo = st.sidebar.radio(
-        "🧩 Select Edge Detection Algorithm:",
-        ("Sobel", "Laplacian", "Canny")
+# File uploader
+uploaded_file = st.file_uploader(
+    "Upload an image (JPG, PNG, BMP)",
+    type=['jpg', 'jpeg', 'png', 'bmp']
+)
+
+if uploaded_file is not None:
+    # Read and convert the uploaded image
+    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+    original_image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+    st.session_state.original_image = original_image
+
+# Only show the interface if an image is uploaded
+if st.session_state.original_image is not None:
+    original_image = st.session_state.original_image
+    
+    # Sidebar for algorithm selection and parameters
+    st.sidebar.header("Edge Detection Settings")
+    
+    # Algorithm selection
+    algorithm = st.sidebar.selectbox(
+        "Select Edge Detection Algorithm",
+        ["Sobel", "Laplacian", "Canny"]
     )
+    
+    st.sidebar.markdown("---")
+    st.sidebar.subheader(f"{algorithm} Parameters")
+    
+    # Algorithm-specific parameters
+    if algorithm == "Canny":
+        lower_threshold = st.sidebar.slider(
+            "Lower Threshold",
+            min_value=0,
+            max_value=255,
+            value=50,
+            step=5
+        )
+        upper_threshold = st.sidebar.slider(
+            "Upper Threshold",
+            min_value=0,
+            max_value=255,
+            value=150,
+            step=5
+        )
+        kernel_size = st.sidebar.slider(
+            "Kernel Size (for Gaussian blur)",
+            min_value=3,
+            max_value=15,
+            value=5,
+            step=2
+        )
+        sigma = st.sidebar.slider(
+            "Sigma (Gaussian blur)",
+            min_value=0.1,
+            max_value=5.0,
+            value=1.4,
+            step=0.1
+        )
+        
+        # Apply Canny edge detection
+        gray = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
+        blurred = cv2.GaussianBlur(gray, (kernel_size, kernel_size), sigma)
+        edges = cv2.Canny(blurred, lower_threshold, upper_threshold)
+        
+    elif algorithm == "Sobel":
+        kernel_size = st.sidebar.slider(
+            "Kernel Size",
+            min_value=1,
+            max_value=7,
+            value=3,
+            step=2
+        )
+        gradient_direction = st.sidebar.radio(
+            "Gradient Direction",
+            ["Both (X and Y)", "X Direction", "Y Direction"]
+        )
+        
+        # Apply Sobel edge detection
+        gray = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
+        
+        if gradient_direction == "X Direction":
+            edges = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=kernel_size)
+            edges = np.absolute(edges)
+        elif gradient_direction == "Y Direction":
+            edges = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=kernel_size)
+            edges = np.absolute(edges)
+        else:  # Both directions
+            sobel_x = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=kernel_size)
+            sobel_y = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=kernel_size)
+            edges = np.sqrt(sobel_x**2 + sobel_y**2)
+        
+        # Normalize to 0-255 range
+        edges = np.uint8(255 * edges / np.max(edges))
+        
+    elif algorithm == "Laplacian":
+        kernel_size = st.sidebar.slider(
+            "Kernel Size",
+            min_value=1,
+            max_value=31,
+            value=3,
+            step=2
+        )
+        
+        # Apply Laplacian edge detection
+        gray = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
+        edges = cv2.Laplacian(gray, cv2.CV_64F, ksize=kernel_size)
+        edges = np.absolute(edges)
+        # Normalize to 0-255 range
+        edges = np.uint8(255 * edges / np.max(edges))
+    
+    # Display images side by side
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Input Image")
+        # Convert BGR to RGB for display
+        original_rgb = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
+        st.image(original_rgb, use_container_width=True)
+    
+    with col2:
+        st.subheader(f"Output Image ({algorithm})")
+        st.image(edges, use_container_width=True, clamp=True)
+    
+    # Display current parameter values
+    st.sidebar.markdown("---")
+    st.sidebar.info(f"**Currently using:** {algorithm} edge detection")
 
-    # ---- Algorithm-specific Parameters ----
-    params = {}
-    if algo == "Sobel":
-        params["ksize"] = st.sidebar.slider("Kernel Size (odd number)", 1, 7, 3, step=2)
-        direction = st.sidebar.selectbox("Gradient Direction", ("X", "Y", "Both"), index=2)
-        params["direction"] = direction
-
-    elif algo == "Laplacian":
-        params["ksize"] = st.sidebar.slider("Kernel Size (odd number)", 1, 7, 3, step=2)
-
-    elif algo == "Canny":
-        params["lower"] = st.sidebar.slider("Lower Threshold", 0, 255, 50)
-        params["upper"] = st.sidebar.slider("Upper Threshold", 0, 255, 150)
-        params["aperture"] = st.sidebar.selectbox("Aperture Size", (3, 5, 7), index=1)
-        params["sigma"] = st.sidebar.slider("Gaussian Sigma", 0.0, 5.0, 1.0)
-
-    apply_button = st.sidebar.button("🖼️ Apply / Update")
-
-    # ---- Apply Algorithm ----
-    if apply_button or algo != "Canny":  # Canny can auto-refresh quickly
-        if algo == "Sobel":
-            # Custom Sobel with direction
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            if params["direction"] == "X":
-                sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=params["ksize"])
-                result = cv2.convertScaleAbs(sobelx)
-            elif params["direction"] == "Y":
-                sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=params["ksize"])
-                result = cv2.convertScaleAbs(sobely)
-            else:
-                result = edge_detection.sobel_detection(img, cv2.CV_64F, params["ksize"])
-
-        elif algo == "Laplacian":
-            result = edge_detection.laplacian_detection(img, params["ksize"])
-
-        elif algo == "Canny":
-            result = edge_detection.canny_detection(
-                img, params["lower"], params["upper"], params["aperture"], params["sigma"]
-            )
-
-        # ---- Display Images Side by Side ----
-        st.subheader(f"🔍 {algo} Edge Detection Result")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("### 🖼️ Original Image")
-            st.image(img, channels="BGR", use_container_width=True)
-        with col2:
-            st.markdown(f"### 🧾 {algo} Output")
-            st.image(result, channels="GRAY", use_container_width=True)
 else:
-    st.info("📥 Please upload an image to start experimenting with edge detection.")
+    st.info("👆 Please upload an image to begin edge detection")
+    st.markdown("""
+    ### Supported Algorithms:
+    - **Sobel**: Gradient-based edge detection (X, Y, or both directions)
+    - **Laplacian**: Second derivative-based edge detection
+    - **Canny**: Multi-stage edge detection with hysteresis thresholding
+    
+    ### Features:
+    - Real-time parameter adjustment
+    - Side-by-side comparison of original and processed images
+    - Support for JPG, PNG, and BMP formats
+    """)
