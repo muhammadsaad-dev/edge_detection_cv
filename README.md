@@ -40,7 +40,7 @@ uv venv
 
    - On Windows:
      ```bash
-     .venv\Scripts\activate
+     .\.venv\Scripts\Activate.ps1
      ```
    - On macOS/Linux:
      ```bash
