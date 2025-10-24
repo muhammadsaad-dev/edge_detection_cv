@@ -116,15 +116,15 @@ edge-detection-app/
 
 ### Canny
 
-![Canny algorithm](screenshots\canny.png)
+![Canny algorithm](screenshots/canny.png)
 
 ### Sobel
 
-![Sobel algorithm](screenshots\sobel.png)
+![Sobel algorithm](screenshots/sobel.png)
 
 ### Laplacian
 
-![Laplacian algorithm](screenshots\laplacian.png)
+![Laplacian algorithm](screenshots/laplacian.png)
 
 ## Author
 
