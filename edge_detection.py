@@ -2,15 +2,9 @@ import cv2
 
 def sobel_detection(img, ksize):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    # Always compute gradients in float64 
     sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=ksize)
     sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=ksize)
-
-    # Magnitude of gradients
     sobel_combined = cv2.magnitude(sobelx, sobely)
-
-    # Convert to 8-bit for display
     sobel_combined = cv2.convertScaleAbs(sobel_combined)
 
     return sobel_combined
